@@ -15,21 +15,18 @@ def detector():
 
 
 def test_no_bees_in_portrait(detector):
-    r = detector.detect_bytes((SAMPLES / "IMG_8283.JPG").read_bytes())
-    assert r.counts["worker"] + r.counts["drone"] + r.counts["queen"] == 0
-    assert r.counts["varroa"] == 0  # a 400px-wide "mite" false positive is filtered by size
+    assert detector.detect_bytes((SAMPLES / "IMG_8283.JPG").read_bytes()).count == 0
 
 
 def test_single_bee(detector):
     r = detector.detect_bytes((SAMPLES / "20200509_150918.jpg").read_bytes())
-    assert r.counts["worker"] == 1
+    assert r.count == 1
     # EXIF orientation 6: the oriented image is portrait
     assert r.height > r.width
 
 
 def test_dense_cluster(detector):
-    r = detector.detect_bytes((SAMPLES / "20190729_201604.jpg").read_bytes())
-    assert r.counts["worker"] >= 80
+    assert detector.detect_bytes((SAMPLES / "20190729_201604.jpg").read_bytes()).count >= 80
 
 
 def test_api_roundtrip():
@@ -38,6 +35,7 @@ def test_api_roundtrip():
             resp = client.post("/api/detect", files={"file": ("frame.jpg", f, "image/jpeg")})
         assert resp.status_code == 200
         body = resp.json()
-        assert body["counts"]["worker"] >= 80
-        assert {"x", "y", "w", "h", "cls", "conf"} <= set(body["detections"][0])
+        assert body["count"] >= 80
+        assert body["count"] == len(body["detections"])
+        assert {"x", "y", "w", "h", "conf"} <= set(body["detections"][0])
         assert client.post("/api/detect", files={"file": ("x.txt", b"nope", "text/plain")}).status_code == 400

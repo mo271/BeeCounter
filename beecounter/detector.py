@@ -2,6 +2,9 @@
 
 The model was trained on downscaled frame photos, so whole-image inference at
 640px works far better than higher resolutions or tiling (see scripts/).
+
+The model distinguishes worker, drone, queen and varroa mite. We only count
+bees: worker, drone and queen detections are merged, mites are ignored.
 """
 from __future__ import annotations
 
@@ -14,16 +17,8 @@ from PIL import Image, ImageOps
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "honey_bee_detector.pt"
 IMGSZ = 640
-
-# Model class name -> our short class id
-CLASS_MAP = {"Worker Bee": "worker", "Drone Bee": "drone", "Queen Bee": "queen", "Varroa Mite": "varroa"}
-CLASSES = ["worker", "drone", "queen", "varroa"]
-
-# Per-class confidence thresholds, from the model card (tuned on real frames).
-CONF = {"worker": 0.25, "drone": 0.55, "queen": 0.15, "varroa": 0.30}
-MIN_CONF = min(CONF.values())
-# A varroa mite is a few mm; a "mite" box wider than this fraction of the image is a false positive.
-MAX_VARROA_FRAC = 0.05
+BEE_CLASSES = {"Worker Bee", "Drone Bee", "Queen Bee"}
+CONF = 0.25
 
 
 @dataclass
@@ -32,7 +27,6 @@ class Detection:
     y: float
     w: float
     h: float
-    cls: str
     conf: float
 
 
@@ -41,7 +35,7 @@ class Result:
     width: int
     height: int
     detections: list[Detection]
-    counts: dict[str, int]
+    count: int
     inference_ms: int
 
     def to_dict(self) -> dict:
@@ -49,7 +43,7 @@ class Result:
             "width": self.width,
             "height": self.height,
             "detections": [asdict(d) for d in self.detections],
-            "counts": self.counts,
+            "count": self.count,
             "inference_ms": self.inference_ms,
         }
 
@@ -60,27 +54,20 @@ class Detector:
 
         self.model = YOLO(str(model_path))
         self.imgsz = imgsz
-        self.names = {i: CLASS_MAP.get(n, n) for i, n in self.model.names.items()}
+        self.bee_ids = {i for i, n in self.model.names.items() if n in BEE_CLASSES}
 
     def detect(self, image: Image.Image) -> Result:
         image = ImageOps.exif_transpose(image).convert("RGB")
         t0 = time.perf_counter()
-        res = self.model(image, conf=MIN_CONF, imgsz=self.imgsz, device="cpu", verbose=False)[0]
+        res = self.model(image, conf=CONF, imgsz=self.imgsz, device="cpu", verbose=False)[0]
         ms = int((time.perf_counter() - t0) * 1000)
         dets: list[Detection] = []
         for box in res.boxes:
-            cls = self.names[int(box.cls.item())]
-            conf = float(box.conf.item())
-            if conf < CONF.get(cls, MIN_CONF):
+            if int(box.cls.item()) not in self.bee_ids:
                 continue
             x1, y1, x2, y2 = box.xyxy[0].tolist()
-            if cls == "varroa" and max(x2 - x1, y2 - y1) > MAX_VARROA_FRAC * max(image.size):
-                continue
-            dets.append(Detection((x1 + x2) / 2, (y1 + y2) / 2, x2 - x1, y2 - y1, cls, round(conf, 3)))
-        counts = {c: 0 for c in CLASSES}
-        for d in dets:
-            counts[d.cls] += 1
-        return Result(image.width, image.height, dets, counts, ms)
+            dets.append(Detection((x1 + x2) / 2, (y1 + y2) / 2, x2 - x1, y2 - y1, round(float(box.conf.item()), 3)))
+        return Result(image.width, image.height, dets, len(dets), ms)
 
     def detect_bytes(self, data: bytes) -> Result:
         return self.detect(Image.open(io.BytesIO(data)))

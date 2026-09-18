@@ -2,12 +2,13 @@
 
 A small web tool for beekeepers: upload photos taken during a hive inspection
 and get a bee count per photo and for the whole hive. Every detected bee is
-marked with a colored dot (yellow worker, blue drone, red queen, purple varroa
-mite). Detections can be corrected by clicking, and the counts exported.
+marked with a dot. Detections can be corrected by clicking, and the counts
+exported.
 
 Detection uses the pretrained [Apiarist YOLOv8s honey-bee detector](https://huggingface.co/maryammeda/apiarist-honey-bee-detector)
-(Apache-2.0). It runs on CPU in well under a second per photo. See
-[models/README.md](models/README.md) for details.
+(Apache-2.0). It runs on CPU in well under a second per photo. The model also
+distinguishes workers, drones, queens and varroa mites, but for now everything
+is merged into a single bee count. See [models/README.md](models/README.md).
 
 ## Run it
 
@@ -32,8 +33,6 @@ Then open http://127.0.0.1:8000/.
 
 ## Known limitations
 
-- Queen and drone detection is much weaker than worker detection. Expect to
-  correct these by hand until the model is fine-tuned on corrected data.
 - Blurry photos or bees seen through a cover foil are mostly missed.
 - Corrections live in the browser only. Reloading the page loses them, so
   export before closing.

@@ -9,7 +9,7 @@
 <body>
 <header>
   <h1>🐝 BeeCounter</h1>
-  <p class="sub">Upload photos of your frames. Each bee gets a dot. Click a dot to change its type, click an empty spot to add a bee.</p>
+  <p class="sub">Upload photos of your frames. Each bee gets a dot. Click a dot to remove it, click an empty spot to add a bee.</p>
 </header>
 
 <main>
@@ -24,7 +24,7 @@
 
     <div class="totals card">
       <h2>Hive total</h2>
-      <div id="totals" class="counts"></div>
+      <div class="big"><b id="total">0</b><span>bees</span></div>
       <div class="row">
         <button id="export-json">Export JSON</button>
         <button id="export-csv">Export CSV</button>
@@ -39,16 +39,10 @@
         <strong id="viewer-name"></strong>
         <label><input id="show-dots" type="checkbox" checked> Show dots</label>
         <label>Dot size <input id="dot-size" type="range" min="2" max="14" value="6"></label>
-        <span class="legend">
-          <i class="dot worker"></i> worker
-          <i class="dot drone"></i> drone
-          <i class="dot queen"></i> queen
-          <i class="dot varroa"></i> varroa
-        </span>
+        <span class="big inline"><b id="viewer-count">0</b><span>bees</span></span>
       </div>
       <div class="canvas-wrap"><canvas id="canvas"></canvas></div>
-      <div id="viewer-counts" class="counts"></div>
-      <p class="hint">Click a dot: worker → drone → queen → remove. Click empty space: add a worker.</p>
+      <p class="hint">Click a dot to remove it. Click empty space to add a bee. Dots you added have a white ring.</p>
     </div>
     <div id="empty" class="empty">No image selected yet.</div>
   </section>

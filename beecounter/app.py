@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import UnidentifiedImageError
 
-from .detector import Detector, CLASSES
+from .detector import Detector
 
 STATIC = Path(__file__).resolve().parent / "static"
 MAX_UPLOAD = 30 * 1024 * 1024
@@ -33,11 +33,6 @@ async def index():
 async def favicon():
     svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="26" font-size="26">\U0001F41D</text></svg>'
     return Response(svg, media_type="image/svg+xml")
-
-
-@app.get("/api/classes")
-async def classes():
-    return {"classes": CLASSES}
 
 
 @app.post("/api/detect")

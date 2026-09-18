@@ -5,10 +5,6 @@
   --muted: #7a6f5c;
   --line: #e5dccb;
   --accent: #d9a400;
-  --worker: #ffdc00;
-  --drone: #1e90ff;
-  --queen: #ff1744;
-  --varroa: #c800c8;
 }
 * { box-sizing: border-box; }
 body { margin: 0; font: 15px/1.45 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
@@ -30,23 +26,17 @@ main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 12px
 .thumb .n { font-size: 13px; color: var(--muted); }
 .thumb .status { color: var(--muted); font-size: 12px; }
 .thumb button { font-size: 12px; }
-.counts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.counts div { text-align: center; border-radius: 8px; padding: 8px 4px; background: #f3ede0; }
-.counts b { display: block; font-size: 22px; }
-.counts span { font-size: 12px; color: var(--muted); }
-.counts .total { grid-column: 1 / -1; background: #fff3c4; }
+.big { text-align: center; border-radius: 8px; padding: 10px 4px; background: #fff3c4; }
+.big b { display: block; font-size: 30px; line-height: 1.1; }
+.big span { font-size: 12px; color: var(--muted); }
+.big.inline { margin-left: auto; padding: 4px 14px; display: inline-flex; gap: 6px; align-items: baseline; }
+.big.inline b { font-size: 22px; }
 .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
 button:hover { border-color: var(--accent); }
 button.danger { color: #a22; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 10px; }
 .toolbar label { display: inline-flex; gap: 6px; align-items: center; }
-.legend { margin-left: auto; font-size: 13px; color: var(--muted); }
-.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #000; vertical-align: -2px; margin: 0 2px 0 8px; }
-.dot.worker { background: var(--worker); }
-.dot.drone { background: var(--drone); }
-.dot.queen { background: var(--queen); }
-.dot.varroa { background: var(--varroa); }
 .canvas-wrap { width: 100%; overflow: auto; }
 canvas { display: block; max-width: 100%; height: auto; cursor: crosshair; border-radius: 6px; }
 .hint { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
