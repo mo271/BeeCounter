@@ -3,7 +3,11 @@
 // merge worker/drone/queen into "bee", drop varroa.
 const MODEL_URL = "model/honey_bee_detector.onnx";
 const SIZE = 640;
-const CONF = 0.25;
+// The model runs once with this low floor. The page applies the user's threshold
+// (default DEFAULT_CONF) afterwards. This is equivalent to filtering before NMS because a
+// box can only be suppressed by a higher-confidence box, never by a lower one.
+const CONF_FLOOR = 0.05;
+export const DEFAULT_CONF = 0.25;
 const IOU = 0.7;
 const BEE_CLASSES = [0, 1, 2]; // worker, drone, queen; 3 = varroa
 const PAD = 114;
@@ -75,13 +79,15 @@ function iou(a, b) {
   return inter / ((a.x2 - a.x1) * (a.y2 - a.y1) + (b.x2 - b.x1) * (b.y2 - b.y1) - inter);
 }
 
-// Per-class greedy NMS, like ultralytics (agnostic=False).
+// Greedy NMS across all bee classes. We merge worker/drone/queen into one count, so a bee
+// that the model scores as both "worker" and "drone" must not survive twice (per-class NMS
+// would keep both, which shows up as double dots at low thresholds).
 function nms(cands) {
   cands.sort((a, b) => b.conf - a.conf);
   const keep = [];
   for (const c of cands) {
     let ok = true;
-    for (const k of keep) if (k.cls === c.cls && iou(k, c) > IOU) { ok = false; break; }
+    for (const k of keep) if (iou(k, c) > IOU) { ok = false; break; }
     if (ok) keep.push(c);
   }
   return keep;
@@ -94,21 +100,21 @@ export async function detect(bitmap) {
   const out = await session.run({ images: new ort.Tensor("float32", input, [1, 3, SIZE, SIZE]) });
   const ms = Math.round(performance.now() - t0);
   const o = out[session.outputNames[0]];         // [1, 4 + nc, 8400]
-  const [, rows, n] = o.dims; const nc = rows - 4; const d = o.data;
+  const [, , n] = o.dims; const d = o.data;
   const cands = [];
   for (let i = 0; i < n; i++) {
     let cls = 0, conf = 0;
-    for (let c = 0; c < nc; c++) { const s = d[(4 + c) * n + i]; if (s > conf) { conf = s; cls = c; } }
-    if (conf < CONF) continue;
+    for (const c of BEE_CLASSES) { const s = d[(4 + c) * n + i]; if (s > conf) { conf = s; cls = c; } }
+    if (conf < CONF_FLOOR) continue;
     const cx = d[i], cy = d[n + i], w = d[2 * n + i], h = d[3 * n + i];
     cands.push({ x1: cx - w / 2, y1: cy - h / 2, x2: cx + w / 2, y2: cy + h / 2, conf, cls });
   }
-  const detections = nms(cands).filter((c) => BEE_CLASSES.includes(c.cls)).map((c) => ({
+  const detections = nms(cands).map((c) => ({
     x: ((c.x1 + c.x2) / 2 - left) / r,
     y: ((c.y1 + c.y2) / 2 - top) / r,
     w: (c.x2 - c.x1) / r,
     h: (c.y2 - c.y1) / r,
     conf: Math.round(c.conf * 1000) / 1000,
   }));
-  return { width: bitmap.width, height: bitmap.height, detections, count: detections.length, inference_ms: ms };
+  return { width: bitmap.width, height: bitmap.height, detections, inference_ms: ms };
 }

@@ -65,8 +65,11 @@ class Detector:
         image = ImageOps.exif_transpose(image).convert("RGB")
         t0 = time.perf_counter()
         # rect=False pads to a 640x640 square exactly like the ONNX export used in the browser,
-        # so this reference and web/detector.js produce identical results.
-        res = self.model(image, conf=CONF, iou=IOU, max_det=MAX_DET, imgsz=self.imgsz, rect=False, device="cpu", verbose=False)[0]
+        # so this reference and docs/detector.js produce identical results. classes= keeps only
+        # bee classes before NMS and agnostic=True suppresses across them, so a bee scored as
+        # both worker and drone is counted once.
+        res = self.model(image, conf=CONF, iou=IOU, max_det=MAX_DET, imgsz=self.imgsz, rect=False,
+                         classes=sorted(self.bee_ids), agnostic_nms=True, device="cpu", verbose=False)[0]
         ms = int((time.perf_counter() - t0) * 1000)
         dets: list[Detection] = []
         for box in res.boxes:

@@ -2,8 +2,9 @@
 
 A small web tool for beekeepers: upload photos taken during a hive inspection
 and get a bee count per photo and for the whole hive. Every detected bee is
-marked with a dot. Detections can be corrected by clicking, and the counts
-exported.
+marked with a dot. Detections can be corrected by clicking, a per-photo
+threshold slider trades missed bees against false positives (useful for
+blurry photos), and the counts can be exported.
 
 Live site: https://firsching.ch/BeeCounter/
 
