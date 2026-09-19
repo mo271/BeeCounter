@@ -44,3 +44,8 @@ canvas { display: block; max-width: 100%; height: auto; cursor: crosshair; borde
 .status { font-size: 13px; }
 .status.ready { color: #2a7a2a; }
 .status.error { color: #a22; }
+
+/* link back to the source, bottom right like on arxiv-comments */
+.github-icon { position: fixed; bottom: 10px; right: 10px; display: inline-block; }
+.github-icon img { width: 24px; height: 24px; opacity: 0.7; transition: opacity 0.3s; }
+.github-icon img:hover { opacity: 1; }

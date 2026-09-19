@@ -10,3 +10,5 @@ Re-download with:
       https://huggingface.co/maryammeda/apiarist-honey-bee-detector/resolve/main/honey_bee_detector.pt
 
 Best setting found on our samples: whole image, imgsz=640 (see scripts/try_detector.py).
+The browser uses the ONNX export in docs/model/, regenerated with scripts/export_onnx.py.
+Licensing and attribution: see THIRD_PARTY_NOTICES.md at the repo root.
