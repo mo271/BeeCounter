@@ -66,7 +66,7 @@ async function addFiles(files) {
     if (!isImage(file)) continue;
     const img = { id: crypto.randomUUID(), name: file.name, file, thumb: null,
                   bitmap: null, result: null, dets: null, threshold: DEFAULT_CONF, status: "waiting…", error: null };
-    state.images.push(img);
+    state.images.unshift(img); // newest on top
     renderList();
     queue = queue.then(() => detect(img));
   }
@@ -86,7 +86,7 @@ async function detect(img) {
     img.error = e.message; img.status = "failed";
   }
   renderList(); renderTotal();
-  if (!state.active) select(img.id); else if (state.active === img.id) renderViewer();
+  if (!img.error) select(img.id); // focus follows the newest finished photo
 }
 
 // ---------- counts ----------
@@ -114,7 +114,7 @@ $("images").addEventListener("click", (e) => {
 });
 function remove(id) {
   state.images = state.images.filter((i) => i.id !== id);
-  if (state.active === id) state.active = state.images[0]?.id || null;
+  if (state.active === id) state.active = state.images[0]?.id || null; // fall back to the newest
   renderList(); renderTotal(); renderViewer();
 }
 function select(id) { state.active = id; renderList(); renderViewer(); }
