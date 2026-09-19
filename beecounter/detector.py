@@ -19,6 +19,8 @@ MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "honey_bee_dete
 IMGSZ = 640
 BEE_CLASSES = {"Worker Bee", "Drone Bee", "Queen Bee"}
 CONF = 0.25
+IOU = 0.7  # NMS threshold (ultralytics default)
+MAX_DET = 1000  # ultralytics caps at 300 by default; a full frame can hold more bees
 
 
 @dataclass
@@ -59,7 +61,9 @@ class Detector:
     def detect(self, image: Image.Image) -> Result:
         image = ImageOps.exif_transpose(image).convert("RGB")
         t0 = time.perf_counter()
-        res = self.model(image, conf=CONF, imgsz=self.imgsz, device="cpu", verbose=False)[0]
+        # rect=False pads to a 640x640 square exactly like the ONNX export used in the browser,
+        # so this reference and web/detector.js produce identical results.
+        res = self.model(image, conf=CONF, iou=IOU, max_det=MAX_DET, imgsz=self.imgsz, rect=False, device="cpu", verbose=False)[0]
         ms = int((time.perf_counter() - t0) * 1000)
         dets: list[Detection] = []
         for box in res.boxes:

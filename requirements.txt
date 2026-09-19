@@ -8,3 +8,6 @@ uvicorn[standard]
 python-multipart
 pytest
 httpx
+onnx
+onnxslim
+onnxruntime
