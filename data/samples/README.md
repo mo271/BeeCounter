@@ -9,4 +9,5 @@ Sanity checks:
 - `20200509_150918.jpg` contains exactly one bee, not on a comb.
 
 All other images show bees on frames or top bars, from sparse to very dense.
+`Rot Wabe 1a.HEIC` is an iPhone HEIC photo of a full frame with several hundred bees.
 `PXL_20250714_152753571.jpg` includes a marked queen (blue dot).

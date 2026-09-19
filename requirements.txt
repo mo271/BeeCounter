@@ -3,6 +3,7 @@ torch
 torchvision
 ultralytics
 pillow
+pillow-heif
 fastapi
 uvicorn[standard]
 python-multipart

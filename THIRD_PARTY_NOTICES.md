@@ -31,6 +31,8 @@ Provenance of those weights, as stated by the author:
 ## Software dependencies
 
 - ONNX Runtime Web (MIT), loaded from a CDN by the site; not redistributed.
+- libheif-js (LGPL-3.0, a WebAssembly build of libheif), loaded from a CDN
+  only when a HEIC photo is added; not redistributed.
 - ultralytics (AGPL-3.0), PyTorch (BSD-3), ONNX (Apache-2.0), FastAPI (MIT),
   Pillow (MIT-CMU): Python development dependencies used by the reference
   implementation and tests. They are not part of the published site.

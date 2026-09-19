@@ -23,6 +23,8 @@ Any static file server works, for example:
 
 Then open http://127.0.0.1:8000/. The first visit downloads the 43 MB model,
 after that the browser caches it. A photo takes about a second on a laptop.
+JPEG, PNG and iPhone HEIC photos are supported; HEIC decoding uses libheif
+compiled to WebAssembly, fetched on first use.
 
 ## Layout
 

@@ -14,6 +14,9 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 
 from PIL import Image, ImageOps
+from pillow_heif import register_heif_opener
+
+register_heif_opener()  # lets Pillow open HEIC/HEIF photos from iPhones
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "honey_bee_detector.pt"
 IMGSZ = 640

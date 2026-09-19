@@ -21,7 +21,7 @@ main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 12px
 .images { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
 .thumb { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); cursor: pointer; }
 .thumb.active { outline: 2px solid var(--accent); }
-.thumb img { width: 64px; height: 48px; object-fit: cover; border-radius: 4px; }
+.thumb img, .thumb-placeholder { display: block; width: 64px; height: 48px; object-fit: cover; border-radius: 4px; background: #eee6d4; }
 .thumb .name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .thumb .n { font-size: 13px; color: var(--muted); }
 .thumb .status { color: var(--muted); font-size: 12px; }

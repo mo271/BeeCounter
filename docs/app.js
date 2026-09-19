@@ -23,11 +23,48 @@ drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.ad
 drop.addEventListener("dragleave", () => drop.classList.remove("over"));
 drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); });
 
+// ---------- image decoding ----------
+const isHeic = (file) => /\.(heic|heif)$/i.test(file.name) || /image\/hei[cf]/.test(file.type);
+const isImage = (file) => file.type.startsWith("image/") || isHeic(file);
+
+// Chrome and Firefox cannot decode HEIC (iPhone photos); Safari can. Try the browser first,
+// then fall back to libheif compiled to WebAssembly, loaded only when first needed.
+let libheifPromise = null;
+async function decodeHeic(file) {
+  if (!libheifPromise) libheifPromise = import("https://cdn.jsdelivr.net/npm/libheif-js@1.23.2/libheif-wasm/libheif-bundle.mjs")
+    .then(async (m) => { const lib = typeof m.default === "function" ? m.default() : m.default; if (lib.ready) await lib.ready; return lib; });
+  const libheif = await libheifPromise;
+  if (typeof libheif.HeifDecoder !== "function") throw new Error("HEIC decoder unavailable");
+  const images = new libheif.HeifDecoder().decode(new Uint8Array(await file.arrayBuffer()));
+  if (!images.length) throw new Error("no image found in HEIC file");
+  const image = images[0];
+  const width = image.get_width(), height = image.get_height();
+  const imageData = new ImageData(width, height);
+  await new Promise((resolve, reject) => image.display(imageData, (ok) => (ok ? resolve() : reject(new Error("HEIC decode failed")))));
+  return createImageBitmap(imageData);
+}
+
+async function loadBitmap(file) {
+  try {
+    return await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch (e) {
+    if (isHeic(file)) return decodeHeic(file);
+    throw new Error("could not read this image");
+  }
+}
+
+// small preview drawn from the decoded bitmap, so it also works for formats the <img> tag cannot show
+async function makeThumb(bitmap) {
+  const w = 128, h = Math.max(1, Math.round(bitmap.height * w / bitmap.width));
+  const c = new OffscreenCanvas(w, h); c.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+  return URL.createObjectURL(await c.convertToBlob({ type: "image/jpeg", quality: 0.8 }));
+}
+
 let queue = Promise.resolve(); // run detections one after another; the model is single-threaded anyway
 async function addFiles(files) {
   for (const file of files) {
-    if (!file.type.startsWith("image/")) continue;
-    const img = { id: crypto.randomUUID(), name: file.name, file, url: URL.createObjectURL(file),
+    if (!isImage(file)) continue;
+    const img = { id: crypto.randomUUID(), name: file.name, file, thumb: null,
                   bitmap: null, result: null, dets: null, status: "waiting…", error: null };
     state.images.push(img);
     renderList();
@@ -37,9 +74,11 @@ async function addFiles(files) {
 
 async function detect(img) {
   try {
+    img.status = "reading…"; renderList();
+    img.bitmap = await loadBitmap(img.file);
+    img.thumb = await makeThumb(img.bitmap);
     img.status = "detecting…"; renderList();
     await modelReady;
-    img.bitmap = await createImageBitmap(img.file, { imageOrientation: "from-image" });
     img.result = await detectBitmap(img.bitmap);
     img.dets = img.result.detections.map((d) => ({ ...d, source: "model" }));
     img.status = `${img.result.inference_ms} ms`;
@@ -58,7 +97,7 @@ function renderTotal() { $("total").textContent = total(); }
 function renderList() {
   $("images").innerHTML = state.images.map((img) => `
     <div class="thumb ${img.id === state.active ? "active" : ""}" data-id="${img.id}">
-      <img src="${img.url}" alt="">
+      ${img.thumb ? `<img src="${img.thumb}" alt="">` : `<span class="thumb-placeholder"></span>`}
       <div><div class="name" title="${img.name}">${img.name}</div>
            <div class="n">${img.dets ? img.dets.length + " bees" : ""}</div>
            <div class="status">${img.error || img.status}</div></div>

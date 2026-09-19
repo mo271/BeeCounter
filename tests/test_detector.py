@@ -29,6 +29,13 @@ def test_dense_cluster(detector):
     assert detector.detect_bytes((SAMPLES / "20190729_201604.jpg").read_bytes()).count >= 80
 
 
+def test_heic_full_frame(detector):
+    # iPhone HEIC photo of a full frame; also exercises the raised max_det (>300 bees)
+    r = detector.detect_bytes((SAMPLES / "Rot Wabe 1a.HEIC").read_bytes())
+    assert r.count > 300
+    assert (r.width, r.height) == (4032, 3024)
+
+
 def test_api_roundtrip():
     with TestClient(app) as client:
         with open(SAMPLES / "PXL_20240602_083422333.jpg", "rb") as f:
