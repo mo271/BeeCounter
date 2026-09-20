@@ -60,6 +60,23 @@ async function makeThumb(bitmap) {
   return URL.createObjectURL(await c.convertToBlob({ type: "image/jpeg", quality: 0.8 }));
 }
 
+// example photos shipped with the site, loaded through the same path as an upload
+for (const btn of document.querySelectorAll(".example")) {
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    try {
+      const resp = await fetch(btn.dataset.src);
+      if (!resp.ok) throw new Error(resp.statusText);
+      const blob = await resp.blob();
+      addFiles([new File([blob], btn.dataset.name, { type: blob.type || "image/jpeg" })]);
+    } catch (e) {
+      alert(`Could not load the example photo: ${e.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
 let queue = Promise.resolve(); // run detections one after another; the model is single-threaded anyway
 async function addFiles(files) {
   for (const file of files) {

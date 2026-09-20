@@ -41,4 +41,9 @@ Provenance of those weights, as stated by the author:
 
 - `docs/assets/github-mark.svg` is GitHub's logo, used to link to the source
   repository as permitted by GitHub's logo guidelines.
+- `docs/examples/csiro_honeybees_in_hive.jpg` (and its thumbnail) is
+  "European honeybees (Apis mellifera) in a hive" by Nick Pitsas, CSIRO,
+  CSIRO ScienceImage 7077, licensed CC BY 3.0, via Wikimedia Commons:
+  https://commons.wikimedia.org/wiki/File:CSIRO_ScienceImage_7077_European_honeybees_Apis_mellifera_in_a_hive.jpg
+  It was re-encoded as JPEG with metadata stripped; no other changes.
 - The photos in `data/samples/` were taken by the repository owner.

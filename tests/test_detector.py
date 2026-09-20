@@ -7,6 +7,7 @@ from beecounter.app import app
 from beecounter.detector import Detector
 
 SAMPLES = Path(__file__).resolve().parent.parent / "data" / "samples"
+EXAMPLES = Path(__file__).resolve().parent.parent / "docs" / "examples"
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +35,11 @@ def test_heic_full_frame(detector):
     r = detector.detect_bytes((SAMPLES / "Rot Wabe 1a.HEIC").read_bytes())
     assert r.count > 300
     assert (r.width, r.height) == (4032, 3024)
+
+
+def test_site_example_photo(detector):
+    # the CC BY example shipped with the site: a dense, sharp comb with ~200 bees
+    assert detector.detect_bytes((EXAMPLES / "csiro_honeybees_in_hive.jpg").read_bytes()).count > 150
 
 
 def test_api_roundtrip():

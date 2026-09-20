@@ -30,7 +30,8 @@ compiled to WebAssembly, fetched on first use.
 ## Layout
 
 - `docs/` is the whole site: `index.html`, `app.js` (UI), `detector.js`
-  (preprocessing, ONNX inference, NMS) and `model/honey_bee_detector.onnx`.
+  (preprocessing, ONNX inference, NMS), `model/honey_bee_detector.onnx` and
+  an example photo in `examples/` (CC BY 3.0, see the notices file).
   It is called `docs` only because GitHub Pages can publish either the repo
   root or a folder with exactly that name straight from the `main` branch,
   without a build workflow. There is no documentation in it. The empty

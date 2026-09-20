@@ -18,6 +18,12 @@ main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 12px
 .drop { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 28px 12px; border: 2px dashed var(--accent); border-radius: 10px; background: var(--card); cursor: pointer; text-align: center; }
 .drop.over { background: #fff3c4; }
 .drop small { color: var(--muted); }
+.examples { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.examples .example { padding: 0; border: 2px solid var(--line); border-radius: 6px; background: none; line-height: 0; grid-row: span 2; }
+.examples .example:hover { border-color: var(--accent); }
+.examples .example img { width: 96px; height: 64px; object-fit: cover; border-radius: 4px; }
+.examples .credit { font-size: 11px; }
+.examples .credit a { color: inherit; }
 .images { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
 .thumb { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); cursor: pointer; }
 .thumb.active { outline: 2px solid var(--accent); }
